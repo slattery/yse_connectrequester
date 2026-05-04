@@ -4,6 +4,7 @@ services:
     arguments:
       - '@http_client'
       - '@logger.channel.yse_connectrequester'
+      - '@cache.default'
 
   logger.channel.yse_connectrequester:
     parent: logger.channel_base

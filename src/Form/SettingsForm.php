@@ -67,6 +67,15 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['cache_ttl_minutes'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Cache TTL (minutes)'),
+      '#description' => $this->t('How long to cache the YaleConnect API response and the rendered preview page. Set to 0 to disable caching.'),
+      '#default_value' => $config->get('cache_ttl_minutes'),
+      '#min' => 0,
+      '#required' => TRUE,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -79,6 +88,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('group_type_ids', $form_state->getValue('group_type_ids'))
       ->set('cutoff_days_email', (int) $form_state->getValue('cutoff_days_email'))
       ->set('cutoff_days_filtered', (int) $form_state->getValue('cutoff_days_filtered'))
+      ->set('cache_ttl_minutes', (int) $form_state->getValue('cache_ttl_minutes'))
       ->save();
 
     parent::submitForm($form, $form_state);

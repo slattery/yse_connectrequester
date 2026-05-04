@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\yse_connectrequester\Service;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
@@ -25,14 +26,53 @@ class YaleConnectFetcher {
    *   The HTTP client.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger channel.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The default cache backend.
    */
   public function __construct(
     protected ClientInterface $httpClient,
     protected LoggerInterface $logger,
+    protected CacheBackendInterface $cache,
   ) {}
 
   /**
-   * Fetches upcoming events from the YaleConnect API.
+   * Fetches upcoming events from the YaleConnect API, with caching.
+   *
+   * Results are cached for $ttl_minutes. Pass 0 to bypass caching.
+   *
+   * @param int $cutoff_days
+   *   Number of days ahead to fetch events for.
+   * @param string $api_secret
+   *   The API secret sent as X-CG-API-Secret header.
+   * @param string $group_type_ids
+   *   Comma-separated group type IDs.
+   * @param int $ttl_minutes
+   *   Cache lifetime in minutes. 0 disables caching.
+   *
+   * @return array|null
+   *   Normalized array of event arrays, or NULL on failure.
+   */
+  public function fetchEvents(int $cutoff_days, string $api_secret, string $group_type_ids, int $ttl_minutes = 15): ?array {
+    $cid = 'yse_connectrequester:events:' . md5($group_type_ids . ':' . $cutoff_days);
+
+    if ($ttl_minutes > 0) {
+      $cached = $this->cache->get($cid);
+      if ($cached !== FALSE) {
+        return $cached->data;
+      }
+    }
+
+    $items = $this->doFetch($cutoff_days, $api_secret, $group_type_ids);
+
+    if ($items !== NULL && $ttl_minutes > 0) {
+      $this->cache->set($cid, $items, time() + ($ttl_minutes * 60));
+    }
+
+    return $items;
+  }
+
+  /**
+   * Performs the live HTTP request to the YaleConnect API.
    *
    * @param int $cutoff_days
    *   Number of days ahead to fetch events for.
@@ -44,7 +84,7 @@ class YaleConnectFetcher {
    * @return array|null
    *   Normalized array of event arrays, or NULL on failure.
    */
-  public function fetchEvents(int $cutoff_days, string $api_secret, string $group_type_ids): ?array {
+  protected function doFetch(int $cutoff_days, string $api_secret, string $group_type_ids): ?array {
     $cutoff_date = new \DateTime("+{$cutoff_days} days");
     $url = self::API_BASE_URL . '?' . http_build_query([
       'time_range' => 'upcoming_only',

@@ -2,3 +2,4 @@ api_secret: ''
 group_type_ids: '4951287,35203'
 cutoff_days_email: 13
 cutoff_days_filtered: 14
+cache_ttl_minutes: 15

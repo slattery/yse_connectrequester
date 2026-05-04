@@ -94,6 +94,7 @@ class EventsPreviewController extends ControllerBase {
     $config = $this->config('yse_connectrequester.settings');
     $api_secret = $config->get('api_secret') ?? '';
     $group_type_ids = $config->get('group_type_ids') ?? '4951287,35203';
+    $ttl_minutes = (int) ($config->get('cache_ttl_minutes') ?? 15);
     $cutoff_days = $method === 'filter'
       ? (int) ($config->get('cutoff_days_filtered') ?? 14)
       : (int) ($config->get('cutoff_days_email') ?? 13);
@@ -101,15 +102,20 @@ class EventsPreviewController extends ControllerBase {
     $audience_data = self::AUDIENCE_MAP[$audience] ?? self::AUDIENCE_MAP['yse'];
     $email_audience = $audience_data['label'];
 
-    $events = $this->fetcher->fetchEvents($cutoff_days, $api_secret, $group_type_ids);
+    $events = $this->fetcher->fetchEvents($cutoff_days, $api_secret, $group_type_ids, $ttl_minutes);
 
+    // On API failure, return an uncached error message.
     if ($events === NULL) {
       return [
         '#markup' => '<div style="text-align:center;font-size:18px;"><h3>Sorry for the Glitch</h3><p>The YaleConnect API could not be reached. Please try again in a few seconds.</p></div>',
+        '#cache' => ['max-age' => 0],
       ];
     }
 
     $listings = $this->fetcher->prepareListings($events, $email_audience, $method);
+
+    // max-age matches the API cache TTL so both layers expire together.
+    $max_age = $ttl_minutes > 0 ? $ttl_minutes * 60 : 0;
 
     return [
       '#theme' => 'yse_connectrequester_events',
@@ -118,6 +124,10 @@ class EventsPreviewController extends ControllerBase {
       '#footer_because' => $audience_data['footer_because'],
       '#listings' => $listings['all'],
       '#listings_for_audience' => $listings['for_audience'],
+      '#cache' => [
+        'max-age' => $max_age,
+        'contexts' => ['url.path'],
+      ],
     ];
   }
 
