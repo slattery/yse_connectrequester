@@ -1,0 +1,10 @@
+services:
+  yse_connectrequester.fetcher:
+    class: Drupal\yse_connectrequester\Service\YaleConnectFetcher
+    arguments:
+      - '@http_client'
+      - '@logger.channel.yse_connectrequester'
+
+  logger.channel.yse_connectrequester:
+    parent: logger.channel_base
+    arguments: ['yse_connectrequester']

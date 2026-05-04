@@ -1,0 +1,27 @@
+yse_connectrequester.settings:
+  path: '/admin/config/services/yse-connectrequester'
+  defaults:
+    _form: '\Drupal\yse_connectrequester\Form\SettingsForm'
+    _title: 'YSE Connect Requester Settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+yse_connectrequester.preview:
+  path: '/daily-events/preview/{audience}'
+  defaults:
+    _controller: '\Drupal\yse_connectrequester\Controller\EventsPreviewController::dailyEventsEmail'
+    _title: 'Daily Events Email Preview'
+    audience: 'yse'
+  requirements:
+    _permission: 'access yse connectrequester previews'
+    audience: 'yse|staff|students'
+
+yse_connectrequester.preview_filtered:
+  path: '/daily-events/preview-filtered/{audience}'
+  defaults:
+    _controller: '\Drupal\yse_connectrequester\Controller\EventsPreviewController::dailyEventsEmailFiltered'
+    _title: 'Daily Events Email Preview (Filtered)'
+    audience: 'yse'
+  requirements:
+    _permission: 'access yse connectrequester previews'
+    audience: 'yse|staff|students'

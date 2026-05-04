@@ -1,0 +1,4 @@
+access yse connectrequester previews:
+  title: 'Access YSE ConnectRequester event previews'
+  description: 'View the daily events email preview pages.'
+  restrict access: true

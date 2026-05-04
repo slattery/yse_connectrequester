@@ -1,0 +1,6 @@
+yse_connectrequester.settings:
+  title: 'YSE Connect Requester'
+  description: 'Configure YaleConnect API credentials and event group settings.'
+  route_name: yse_connectrequester.settings
+  parent: system.admin_config_services
+  weight: 10

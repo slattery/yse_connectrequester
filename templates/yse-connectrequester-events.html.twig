@@ -1,0 +1,210 @@
+{#
+/**
+ * @file
+ * Email-ready HTML for the YSE daily events digest.
+ *
+ * Variables:
+ * - email_audience: string — display label for the audience (e.g. 'YSE Students').
+ * - admin_header_bg_color: string — hex color code (without #) for the admin
+ *   header bar, or empty string if not applicable.
+ * - footer_because: string — phrase completing "You are receiving this because…"
+ * - listings: object[] — all fetched event objects.
+ * - listings_for_audience: object[] — events filtered for this audience.
+ *
+ * Each event object exposes (at minimum):
+ *   start_datetime, end_datetime (DateTime), date (Y-m-d string),
+ *   title, eventLink, iCalLink, eventPhoto, eventPhotoFullUrl,
+ *   eventLocation, eventTopics.
+ */
+#}
+<style type="text/css">
+  /* Based on The MailChimp Reset INLINE: Yes. */
+  #outlook a {padding:0;}
+  body{width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0;}
+  .ExternalClass {width:100%;}
+  .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;}
+  #backgroundTable {margin:0; padding:0; width:100% !important; line-height: 100% !important;}
+  img {outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;}
+  a img {border:none;}
+  .image_fix {display:block;}
+  p {margin: 1em 0;}
+  h1, h2, h3, h4, h5, h6 {color: black !important;}
+  h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {color: blue !important;}
+  h2 {color: #00356b !important; font-weight: normal;}
+  h1 a:active, h2 a:active, h3 a:active, h4 a:active, h5 a:active, h6 a:active {color: red !important;}
+  h1 a:visited, h2 a:visited, h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {color: purple !important;}
+  table td {border-collapse: collapse;}
+  table {border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;}
+  a {color: #00356b;}
+
+  @media only screen and (max-device-width: 480px) {
+    a[href^="tel"], a[href^="sms"] {text-decoration:none; color:blue; pointer-events:none; cursor:default;}
+    .mobile_link a[href^="tel"], .mobile_link a[href^="sms"] {text-decoration:default; color:orange !important; pointer-events:auto; cursor:default;}
+  }
+  @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+    a[href^="tel"], a[href^="sms"] {text-decoration:none; color:blue; pointer-events:none; cursor:default;}
+    .mobile_link a[href^="tel"], .mobile_link a[href^="sms"] {text-decoration:default; color:orange !important; pointer-events:auto; cursor:default;}
+  }
+  @media (min-width: 0px) {
+    .hide-default__display-block {display:block !important; mso-hide:unset !important;}
+    .hide-default__display-table {display:table !important; mso-hide:unset !important;}
+  }
+  @media (max-width: 480px) {
+    .hide-mobile {max-height:0px; overflow:hidden; display:none !important;}
+  }
+  @media (min-width: 481px) {
+    .hide-desktop {max-height:0px; overflow:hidden; display:none !important;}
+  }
+
+  <!--[if mso]><!-->
+  @font-face { font-family: 'YaleNew'; src: url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/YaleNew/YaleNew-normal-normal/yalenew-roman-webfont.woff2") format("woff2"), url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/YaleNew/YaleNew-normal-normal/yalenew-roman-webfont.woff") format("woff"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: 'Mallory'; src: url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-Light.woff2") format("woff2"), url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-Light.woff") format("woff"); font-weight: normal; font-style: normal; }
+  @font-face { font-family: 'Mallory'; src: url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-LightItalic.woff2") format("woff2"), url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-LightItalic.woff") format("woff"); font-weight: normal; font-style: italic; }
+  @font-face { font-family: 'Mallory'; src: url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-Medium.woff2") format("woff2"), url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-Medium.woff") format("woff"); font-weight: bold; font-style: normal; }
+  @font-face { font-family: 'Mallory'; src: url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-MediumItalic.woff2") format("woff2"), url("https://news.yale.edu/sites/all/themes/yalenew_base/fonts/Mallory/Mallory/Mallory-MediumItalic.woff") format("woff"); font-weight: bold; font-style: italic; }
+  .yse3_about td div p span {font-family: 'YaleNew', 'Times New Roman', Georgia, serif !important;}
+  .yse3_item_header td h2 a:hover {text-decoration: underline !important;}
+  .yse3_item_header td h2 a {font-family: 'YaleNew', 'Times New Roman', Georgia, serif !important; font-weight: normal !important; text-decoration: none !important;}
+  .yse3_item_text td div p span {font-family: 'Mallory', Arial, Verdana, sans-serif !important;}
+  .yse3_footer_text td div p span {font-family: 'Mallory', Arial, Verdana, sans-serif !important;}
+  .yse3_caption td div p span {font-family: 'Mallory', Arial, Verdana, sans-serif !important;}
+  <!--<![endif]-->
+</style>
+
+<table cellpadding="0" cellspacing="0" border="0" id="backgroundTable" style="background-color: #ffffff; text-align: center;">
+  <tr>
+    <td valign="top">
+      <a href="https://environment.yale.edu/" title="Yale School of the Environment">
+        <img src="https://resources.environment.yale.edu/common/YSE/YSE_blue_clearbox_640.png"
+             style="margin: 0px 0 3px 0; border: 0; max-width: 400px;"
+             alt="Yale School of the Environment Daily Events Email" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <h2 style="font-family: YaleNew, Times, Georgia;">For {{ email_audience }}<br>&nbsp;</h2>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" align="center">
+
+{% if listings_for_audience is empty %}
+  No Events Found
+{% else %}
+  {% set send_date = "now"|date_modify("+0 seconds") %}
+  {% set last_date = '' %}
+
+  {% for listing in listings_for_audience %}
+    {% if listing.date != last_date %}
+      {# Day header #}
+      {% set which_day = listing.start_datetime|date('l') %}
+      {% set which_week = '' %}
+      {% set which_day_transform = 'uppercase' %}
+      {% set interval_days = (listing.start_datetime.timestamp - "now"|date('U'))|abs // 86400 %}
+      {% if interval_days > 6 %}
+        {% set which_week = 'Next ' %}
+        {% set which_day_transform = 'none' %}
+      {% endif %}
+
+      <table width="100%" class="anchored-section clearfix"
+             id="day{{ listing.date }}"
+             style="width: 100%; max-width: 700px; min-width: 400px; margin-top: 20px; text-align: left; background-color: #ffffff;">
+        <tr>
+          <td width="100%" style="width: 100%; text-align: left; padding: 10px 10px; font-family: arial, helvetica, sans-serif; font-size: 14px; background-color: #00356b; color: #ffffff !important; line-height: 18px; text-decoration: none !important; letter-spacing: 1px;">
+            <span style="text-transform: uppercase;">{{ which_week }}</span>&#8203;<span style="text-transform: {{ which_day_transform }};">{{ which_day }}</span>&#8203;
+            &ndash;
+            {{ listing.start_datetime|date('M') }}&#8203;.
+            {{ listing.start_datetime|date('d') }} &nbsp; &nbsp; &nbsp;
+          </td>
+        </tr>
+      </table>
+    {% endif %}
+
+    <table width="100%" style="background-color: #ffffff; width: 100%; max-width: 700px; margin-bottom: 1px; text-align: left; font-family: arial, helvetica, sans-serif;">
+      <tr>
+        <td width="20%" valign="top" style="width: 20%; padding: 15px 5px 0px 5px; text-align: center; color: #555; line-height: 18px;">
+          <div style="font-size: 16px; font-family: arial, helvetica, sans-serif; color: #00356b; font-weight: bold;">
+            {{ listing.start_datetime|date('g:ia') }}<br>
+            <span style="font-size: 10px; line-height: 12px;" title="{{ listing.title }}">{{ listing.start_datetime|date('M. d') }}</span>
+          </div>
+          <div style="font-size: 10px; line-height: 12px; font-family: arial, helvetica, sans-serif; color: #666666;">
+            &ndash; to &ndash;<br />
+            {% if listing.end_datetime|date('Y-m-d') == listing.start_datetime|date('Y-m-d') %}
+              {{ listing.end_datetime|date('g:') }}&#8203;{{ listing.end_datetime|date('i') }}&#8203;{{ listing.end_datetime|date('a') }}
+            {% else %}
+              {{ listing.end_datetime|date('M') }}&#8203;{{ listing.end_datetime|date(' d') }}&#8203;
+            {% endif %}
+          </div>
+          <div style="line-height: 18px; padding: 5px 0 8px 0;">
+            <a href="{{ listing.iCalLink }}" class="btn btn-default btn-xs" data-content="" title="Save to Outlook or iCal">
+              <img src="https://resources.environment.yale.edu/common/icons/apps/ics_32.png" width="30" height="30" />
+            </a>
+          </div>
+        </td>
+
+        {% set event_url = listing.eventLink %}
+        {% set event_link_open = '<a href="' ~ event_url ~ '" title="' ~ listing.title ~ '" class="list-group-item" id="listing-' ~ listing.id ~ '" style="text-decoration: none;">' %}
+
+        <td width="80%" valign="top" style="width: 80%; padding: 10px;">
+          <div class="row">
+            {% if listing.eventPhoto is not empty %}
+              {% set better_image_url = listing.eventPhotoFullUrl|replace({'e3_image_upload': 'r3_image_upload'}) %}
+              {{ event_link_open|raw }}<img src="{{ better_image_url }}" class="image_fix hide-default__display-block hide-mobile" align="right" style="margin-left: 20px; margin-bottom: 10px;" width="150" /></a>
+            {% endif %}
+
+            <div>
+              <div style="margin-top: 0px; text-transform: none; font-size: 18px; font-weight: normal; font-family: Arial, Times, Georgia, serif; margin-bottom: 2px; line-height: 24px;">
+                {{ event_link_open|raw }}{{ listing.title }}</a>
+              </div>
+
+              <div style="font-size: 14px; font-family: arial, helvetica, sans-serif; color: #666666; line-height: 18px;">
+                {% set event_location = listing.eventLocation
+                  |replace({', United States': ''})
+                  |replace({', CT 06520': ''})
+                  |replace({', CT 06511': ''})
+                  |replace({', New Haven': ''}) %}
+                {{ event_location }}
+                {% if listing.eventTopics %}
+                  &mdash; {{ listing.eventTopics|replace({',': ' | '}) }}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2"><hr style="border-top: 1px #f3f3f3 solid; margin: 10px 0;" /></td>
+      </tr>
+    </table>
+
+    {% set last_date = listing.date %}
+  {% endfor %}
+{% endif %}
+
+      {# FOOTER #}
+      <table width="100%" style="width: 100%; max-width: 700px; margin-bottom: 1px; text-align: left; font-family: arial, helvetica, sans-serif;">
+        <tr>
+          <td width="100%" valign="top" style="width: 100%;">
+            <div style="font-size: 14px; font-family: arial, sans-serif; color: #444; line-height: 18px; padding: 40px 0 20px 20px;">
+              You are receiving this message because{{ footer_because }}
+            </div>
+            <div style="font-size: 14px; font-family: arial, sans-serif; color: #444; line-height: 18px; padding: 30px 20px;">
+              <p style="font-size: 14px; line-height: 140%;">
+                <span style="font-family: Arial, sans-serif; font-size: 12px; line-height: 16.8px;">This email was sent by the </span><br />
+                <span style="font-family: Arial, sans-serif; font-size: 14px; line-height: 19.6px;"><strong><span style="font-size: 12px; line-height: 16.8px;">%%Member_Busname%%</span></strong></span><br />
+                <span style="font-family: Arial, sans-serif; font-size: 14px; line-height: 19.6px;"><strong><span style="font-size: 12px; line-height: 16.8px;">%%Member_Addr%%<br /></span></strong><strong><span style="font-size: 12px; line-height: 16.8px;"><span style="font-family: Arial, sans-serif; font-size: 12px; line-height: 16.8px;">%%Member_City%%, %%Member_State%% %%Member_PostalCode%%</span><br /><br /></span></strong><strong><span style="font-size: 12px; line-height: 16.8px;"><a href="%%profile_center_url%%" target="_blank" rel="noopener">&nbsp;</a></span></strong></span>
+              </p>
+            </div>
+            <div>
+              <custom type="footer" />
+              <custom name="opencounter" type="tracking" />
+            </div>
+          </td>
+        </tr>
+      </table>
+      {# end FOOTER #}
+
+    </td>
+  </tr>
+</table>

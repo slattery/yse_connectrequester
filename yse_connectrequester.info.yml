@@ -1,0 +1,5 @@
+name: 'YSE Connect Requester'
+type: module
+description: 'Fetches YaleConnect events via API and renders email-ready HTML previews.'
+package: 'Yale School of the Environment'
+core_version_requirement: ^10 || ^11
