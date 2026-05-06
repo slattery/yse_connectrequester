@@ -1,0 +1,6 @@
+{
+  "name": "slattery/yse_connectrequester",
+  "description": "Fetches YaleConnect events via API and renders email-ready HTML previews",
+  "type": "drupal-custom-module",
+  "license": "GPL-2.0-or-later"
+}
